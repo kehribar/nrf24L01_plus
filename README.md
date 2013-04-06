@@ -4,7 +4,7 @@ This library is probably not the most efficient way of using the nrf24L01+ modul
 
 This library enables the auto acknowledgement and auto retransmission features of the nrf24L01+ in static length payload mode. 
 
-These two features are basically the most important features of the nrf24L01+ modules. With this library, after you make a tranmission attempt, you'll know for sure wheter the slave device got your message properly or not with minimal MCU involvement. Also, nrf24L01+ modules handle the retranmission of the same message if it was lost in hardware up to o limited number with adjustable delays in between attempts.
+These two features are basically the most important features of the nrf24L01+ modules. With this library, after you make a tranmission attempt, you'll know for sure wheter the slave device got your message properly or not with minimal MCU involvement. Also, nrf24L01+ modules automatically handle the retranmission of the same message if it they lost in transmission, up to o limited trials with adjustable delays in between attempts.
 
 ## Usage
 
