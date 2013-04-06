@@ -113,18 +113,18 @@ int main()
 			xprintf("> Message is lost ...\r\n");	
 		}
     	
-    	/* Retranmission count indicates the tranmission quality */
-        temp = nrf24_retransmissionCount();
-        xprintf("> Retranmission count: %d\r\n",temp);
-    
+	    	/* Retranmission count indicates the tranmission quality */
+	        temp = nrf24_retransmissionCount();
+	        xprintf("> Retranmission count: %d\r\n",temp);
+	    
 		/* Optionally, go back to RX mode ... */
-    	nrf24_powerUpRx();
-    	
-    	/* Or you might want to power down after TX */
-    	// nrf24_powerDown();	        
-
-    	/* Wait a little ... */
-    	_delay_ms(10);
+	    	nrf24_powerUpRx();
+	    	
+	    	/* Or you might want to power down after TX */
+	    	// nrf24_powerDown();	        
+	
+	    	/* Wait a little ... */
+	    	_delay_ms(10);
 	}
 }
 /* ------------------------------------------------------------------------- */
