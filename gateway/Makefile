@@ -11,9 +11,13 @@ PROJECT = main
 CSRC    = main.c nrf24.c xprintf.c
 ASRC    = 
 VPATH   = ./util ..
-DEVICE  = attiny84
-F_OSC   = 8000000
-AVRDUDE = avrdude -c usbtiny -p t84 -U flash:w:$(PROJECT).hex
+DEVICE  = atmega328p
+F_OSC   = 16000000
+PORT 	= /dev/tty.usbserial-A900cbrd # Max style serial port definiton
+#PORT	   = /dev/ttyACM0 # Linux style serial port definition
+#PORT   = COM3 # Windows style serial port definition
+AVRDUDE = avrdude -c arduino -p ${DEVICE} -P ${PORT} -b 115200 -U flash:w:$(PROJECT).hex
+RESET   = avrdude -c arduino -p ${DEVICE} -P ${PORT} -b 115200
 
 ###############################################################################
 #
@@ -167,5 +171,10 @@ clean:
 upload:
 	@echo
 	$(AVRDUDE) 
+
+console:
+	@echo
+	$(AVRDUDE) 
+	screen $(PORT) 115200
 
 

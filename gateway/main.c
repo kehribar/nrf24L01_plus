@@ -6,125 +6,141 @@
 * this stuff is worth it, you can buy me a coffee in return.
 * -----------------------------------------------------------------------------
 */
-
+#include <avr/interrupt.h>
 #include <avr/io.h>
 #include <stdint.h>
 #include "../nrf24.h"
-
-/* ------------------------------------------------------------------------- */
-/* Software UART routine. */
-/* 9600 bps. Transmit only */
-/* Transmit pin is: B2 */
-/* ------------------------------------------------------------------------- */
-/* Hardware specific section ... */
-/* ------------------------------------------------------------------------- */
-#include <util/delay.h>
-#define uart_pin_output()	DDRB |= (1<<2)
-#define uart_set_pin()		PORTB |= (1<<2)
-#define uart_clr_pin()		PORTB &= ~(1<<2)
-#define uart_bit_dly()		_delay_us(100)
-/* ------------------------------------------------------------------------- */
-/* Printing functions */
-/* ------------------------------------------------------------------------- */
 #include "./util/xprintf.h"
 /* ------------------------------------------------------------------------- */
-void uart_init()
+volatile uint8_t uartBusy = 0;
+volatile uint8_t new_message = 0;
+volatile uint8_t uart_data;
+volatile uint8_t message_length;
+volatile uint8_t uartBuffer[32];
+volatile uint8_t buffer_index = 0;
+/* ------------------------------------------------------------------------- */
+ISR(USART_RX_vect)
 {
-	uart_pin_output();
+	/* Read the byte from the buffer in any case ... */
+	uart_data = UDR0;
+
+	/* The first arrived byte indicates the length of the incoming packet */
+	if(!uartBusy)
+	{
+		/* Reset the state variables */
+		/* TODO: Use one byte and utilize each bit as a state indicator */
+		uartBusy = 1;
+		new_message = 0;
+		buffer_index = 0;
+		message_length = uart_data;
+
+		/* Be rational ... */
+		if(message_length > sizeof(uartBuffer))
+		{
+			message_length = sizeof(uartBuffer);
+		}
+
+	}
+	else
+	{
+		/* Fill the uart buffer until the end of the packet */
+		if(!new_message)
+		{
+			uartBuffer[buffer_index++] = uart_data;
+
+			/* If true, we reached the end of the packet */
+			if(buffer_index >= message_length)
+			{
+				new_message = 1;
+			}
+		}			
+	}
 }
 /* ------------------------------------------------------------------------- */
-void uart_put_char(uint8_t tx)
+void parse_message()
 {
-	uint8_t i;
-
-	/* Start condition */
-	uart_clr_pin();
-	uart_bit_dly();
-
-	for(i=0;i<8;i++)
+	switch(uartBuffer[0])
 	{
-		if(tx & (1<<i))
+		case 0:			
 		{
-			uart_set_pin();
-		}
-		else
-		{
-			uart_clr_pin();
-		}
 
-		uart_bit_dly();
+			break;
+		}
 	}
+}
+/* ------------------------------------------------------------------------- */
+void send_char(char c)
+{
+	/* Wait for empty transmit buffer ... */
+	while(!(UCSR0A & (1<<UDRE0)));
 
-	/* Stop condition */
-	uart_set_pin();
-	uart_bit_dly();
+	/* Start sending the data! */
+	UDR0 = c;
+
+	/* Wait until the transmission is over ... */
+	while(!(UCSR0A & (1<<TXC0)));
+}
+/* ------------------------------------------------------------------------- */
+void init_serial()
+{
+	/* 115200 baud rate with 16 MHz Xtal ... */
+	const uint8_t ubrr = 8;
+
+	DDRD &= ~(1<<0);
+	DDRD |=  (1<<1);
+
+	/* Set baud rate */ 
+	UBRR0H = (unsigned char)(ubrr>>8); 
+	UBRR0L = (unsigned char)ubrr; 
+
+	/* Enable receiver and transmitter and Receive interupt */ 
+	UCSR0B = (1<<RXEN0)|(1<<TXEN0)|(1<<RXCIE0); 
+
+	/* Set frame format: 8data, 1stop bit no parity */ 
+	UCSR0C = (1<<UCSZ01)|(1<<UCSZ00); 
+
+	/* Enable interrupts ... */
+	sei();
 }
 /* ------------------------------------------------------------------------- */
 uint8_t temp;
 uint8_t q = 0;
 uint8_t data_array[4];
-uint8_t tx_address[5] = {0xE7,0xE7,0xE7,0xE7,0xE7};
-uint8_t rx_address[5] = {0xD7,0xD7,0xD7,0xD7,0xD7};
+uint8_t tx_address[5] = {0xD7,0xD7,0xD7,0xD7,0xD7};
+uint8_t rx_address[5] = {0xE7,0xE7,0xE7,0xE7,0xE7};
 /* ------------------------------------------------------------------------- */
 int main()
 {
-	/* init the software uart */
-	uart_init();
+	/* init the uart */
+	init_serial();
 
 	/* init the xprintf library */
-	xdev_out(uart_put_char);
+	xdev_out(send_char);
 
 	/* simple greeting message */
-	xprintf("\r\n> TX device ready\r\n");
-	
+	xprintf("\r\n> RX device ready\r\n");
+
 	/* init hardware pins */
 	nrf24_init();
 	
 	/* Channel #2 , payload length: 4 */
 	nrf24_config(2,4);
-
+ 
 	/* Set the device addresses */
 	nrf24_tx_address(tx_address);
-	nrf24_rx_address(rx_address);	
+	nrf24_rx_address(rx_address);
 
 	while(1)
-	{				
-		/* Fill the data buffer */
-		data_array[0] = 0x00;
-		data_array[1] = 0xAA;
-		data_array[2] = 0x55;
-		data_array[3] = q++;									
-
-		/* Automatically goes to TX mode */
-		nrf24_send(data_array);		
-		
-		/* Wait for transmission to end */
-		while(nrf24_isSending());
-
-		/* Make analysis on last tranmission attempt */
-		temp = nrf24_lastMessageStatus();
-
-		if(temp == NRF24_TRANSMISSON_OK)
-		{					
-			xprintf("> Tranmission went OK\r\n");
-		}
-		else if(temp == NRF24_MESSAGE_LOST)
-		{					
-			xprintf("> Message is lost ...\r\n");	
-		}
-    	
-	    	/* Retranmission count indicates the tranmission quality */
-	        temp = nrf24_retransmissionCount();
-	        xprintf("> Retranmission count: %d\r\n",temp);
-	    
-		/* Optionally, go back to RX mode ... */
-	    	nrf24_powerUpRx();
-	    	
-	    	/* Or you might want to power down after TX */
-	    	// nrf24_powerDown();	        
-	
-	    	/* Wait a little ... */
-	    	_delay_ms(10);
+	{	
+		if(new_message)
+		{
+			for(q=0;q<message_length;q++)
+			{
+				send_char(uartBuffer[q]);
+			}
+			new_message = 0;
+			uartBusy = 0;
+		}		
 	}
 }
 /* ------------------------------------------------------------------------- */

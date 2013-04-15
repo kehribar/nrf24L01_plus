@@ -22,25 +22,24 @@
 /* -------------------------------------------------------------------------- */
 #include <util/delay.h>
 #include <avr/io.h>
+#define nrf24_ce_output() DDRC |= (1<<0)
+#define nrf24_ce_high() PORTC |= (1<<0)
+#define nrf24_ce_low() PORTC &= ~(1<<0)
 /* -------------------------------------------------------------------------- */
-#define nrf24_ce_output() DDRA |= (1<<0)
-#define nrf24_ce_high() PORTA |= (1<<0)
-#define nrf24_ce_low() PORTA &= ~(1<<0)
+#define nrf24_csn_output() DDRC |= (1<<1)
+#define nrf24_csn_high() PORTC |= (1<<1)
+#define nrf24_csn_low() PORTC &= ~(1<<1)
 /* -------------------------------------------------------------------------- */
-#define nrf24_csn_output() DDRA |= (1<<1)
-#define nrf24_csn_high() PORTA |= (1<<1)
-#define nrf24_csn_low() PORTA &= ~(1<<1)
+#define nrf24_sck_output() DDRC |= (1<<2)
+#define nrf24_sck_high() PORTC |= (1<<2)
+#define nrf24_sck_low() PORTC &= ~(1<<2)
 /* -------------------------------------------------------------------------- */
-#define nrf24_sck_output() DDRA |= (1<<2)
-#define nrf24_sck_high() PORTA |= (1<<2)
-#define nrf24_sck_low() PORTA &= ~(1<<2)
+#define nrf24_mosi_output() DDRC |= (1<<3)
+#define nrf24_mosi_high() PORTC |= (1<<3)
+#define nrf24_mosi_low() PORTC &= ~(1<<3)
 /* -------------------------------------------------------------------------- */
-#define nrf24_mosi_output() DDRA |= (1<<3)
-#define nrf24_mosi_high() PORTA |= (1<<3)
-#define nrf24_mosi_low() PORTA &= ~(1<<3)
-/* -------------------------------------------------------------------------- */
-#define nrf24_miso_input() DDRA &= ~(1<<4)
-#define nrf24_miso_read() (PINA & (1<<4))
+#define nrf24_miso_input() DDRC &= ~(1<<4)
+#define nrf24_miso_read() (PINC & (1<<4))
 /* -------------------------------------------------------------------------- */
 #define nrf24_delay_microseconds(x) _delay_us(x)
 /* -------------------------------------------------------------------------- */
