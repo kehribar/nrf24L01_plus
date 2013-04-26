@@ -8,7 +8,7 @@
 PROJECT = main
 
 ### Source files and search directory
-CSRC    = main.c nrf24.c xprintf.c
+CSRC    = main.c nrf24.c xprintf.c radioPinFunctions.c
 ASRC    = 
 VPATH   = ./util ..
 DEVICE  = attiny84

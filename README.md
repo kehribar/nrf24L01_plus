@@ -10,7 +10,7 @@ These two features are basically the most important features of the nrf24L01+ mo
 
 ### File strutcture
 
-The library basically consists of only three files: `nrf24.c `, `nrf24.h` and `nRF24L01.h` .
+The library basically consists of only three files: `nrf24.c `, `nrf24.h` and `nRF24L01.h` . Hardware spesific functions are defined at the `radioPinFunctions.c` file. This file can be different at each device / platform.
 
 ### Configuration
 
@@ -105,7 +105,7 @@ Also, you need to be in RX mode in order to be able to receive messages.
 
 ## Porting the library
 
-Hardware spesific definitions of the library are in the `nrf24.h` file. This library uses software SPI module and requires only basic digital input / output functions.
+Hardware spesific definitions of the library are in the `radioPinFunctions.c` file which is located at under example folders. This library uses software SPI module and requires only basic digital input / output functions.
 
 ## References
 
