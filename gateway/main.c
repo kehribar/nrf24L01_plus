@@ -5,7 +5,7 @@
 * can do whatever you want with this stuff. If we meet some day, and you think
 * this stuff is worth it, you can buy me a coffee in return.
 * -----------------------------------------------------------------------------
-* This example is work in progres ... 
+* This example is work in progress ... 
 * -----------------------------------------------------------------------------
 */
 #include <avr/io.h>
