@@ -118,6 +118,7 @@ uint8_t nrf24_payloadLength()
     nrf24_csn_digitalWrite(LOW);
     spi_transfer(R_RX_PL_WID);
     status = spi_transfer(0x00);
+    nrf24_csn_digitalWrite(HIGH);
     return status;
 }
 
