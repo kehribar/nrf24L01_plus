@@ -265,7 +265,7 @@ void nrf24_powerDown()
 }
 
 /* software spi routine */
-uint8_t spi_transfer(uint8_t tx)
+uint8_t spi_transfer_SW(uint8_t tx)
 {
     uint8_t i = 0;
     uint8_t rx = 0;    
