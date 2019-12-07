@@ -57,8 +57,10 @@ void    nrf24_powerUpRx();
 void    nrf24_powerUpTx();
 void    nrf24_powerDown();
 
+/* low level SPI bit-banging fall-back function*/
+uint8_t spi_transfer_SW(uint8_t tx);
+
 /* low level interface ... */
-uint8_t spi_transfer(uint8_t tx);
 void    nrf24_transmitSync(uint8_t* dataout,uint8_t len);
 void    nrf24_transferSync(uint8_t* dataout,uint8_t* datain,uint8_t len);
 void    nrf24_configRegister(uint8_t reg, uint8_t value);
@@ -109,8 +111,16 @@ extern void nrf24_mosi_digitalWrite(uint8_t state);
 
 /* -------------------------------------------------------------------------- */
 /* nrf24 MISO pin read function
-/* - returns: Non-zero if the pin is high */
+ * - returns: Non-zero if the pin is high */
 /* -------------------------------------------------------------------------- */
 extern uint8_t nrf24_miso_digitalRead();
+
+/* -------------------------------------------------------------------------- */
+/* nrf24 SPI data transfer function
+ * - should either implement an spi transfer or a call software fallback
+ *   function provided by the library: uint8_t spi_transfer_SW(uint8_t tx);
+ * - returns: received data */
+/* -------------------------------------------------------------------------- */
+extern uint8_t spi_transfer(uint8_t tx);
 
 #endif
